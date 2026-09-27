@@ -1,0 +1,20 @@
+{
+  "name": "smart-waste-collection-platform",
+  "version": "1.0.0",
+  "description": "Smart Waste Collection & Recycling Platform - MVP for Hackathon",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node -e \"require('./database').initDatabase(); console.log('DB Healthy');\""
+  },
+  "keywords": [
+    "waste-management",
+    "recycling",
+    "smart-collection",
+    "sustainability",
+    "hackathon-mvp"
+  ],
+  "author": "EcoCollect Team",
+  "license": "MIT"
+}

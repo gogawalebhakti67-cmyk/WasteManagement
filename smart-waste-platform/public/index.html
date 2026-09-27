@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoCollect | Smart Waste Collection & Recycling Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- TOP IMPACT TICKER BAR -->
+  <div class="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          LIVE SYSTEM
+        </span>
+        <span class="hidden sm:inline text-slate-400">Smart Waste & Resource Recovery Network</span>
+      </div>
+      <div class="flex items-center gap-4 text-xs font-mono" id="topStatsTicker">
+        <div>Diverted: <span class="text-emerald-400 font-bold" id="tickerWeight">148 kg</span></div>
+        <div class="hidden sm:block text-slate-600">•</div>
+        <div>CO₂ Offset: <span class="text-teal-400 font-bold" id="tickerCo2">230 kg</span></div>
+        <div class="hidden sm:block text-slate-600">•</div>
+        <div class="hidden md:block">Tree Eqv: <span class="text-emerald-300 font-bold" id="tickerTrees">10 🌳</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER / NAVBAR -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('request')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent">EcoCollect</span>
+          <span class="hidden sm:inline-block text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full ml-1.5 border border-emerald-200">Smart Platform</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Requester Views) -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-sm font-medium">
+        <button onclick="switchTab('request')" id="nav-request" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 transition flex items-center gap-2">
+          <span>📝</span> Request Pickup
+        </button>
+        <button onclick="switchTab('track')" id="nav-track" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 transition flex items-center gap-2">
+          <span>🔄</span> Track Status
+        </button>
+        <button onclick="switchTab('guide')" id="nav-guide" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 transition flex items-center gap-2">
+          <span>♻️</span> Disposal Guide
+        </button>
+        <button onclick="switchTab('history')" id="nav-history" class="nav-btn px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-slate-900 transition flex items-center gap-2">
+          <span>📋</span> My History
+        </button>
+      </nav>
+
+      <!-- Admin Portal Switch -->
+      <div class="flex items-center gap-3">
+        <button onclick="toggleAdminView()" id="adminSwitchBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition shadow-sm">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          <span id="adminSwitchLabel">Admin Dashboard</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Bar -->
+    <div class="md:hidden flex items-center justify-around border-t border-slate-200 bg-white py-2 px-1 text-xs">
+      <button onclick="switchTab('request')" class="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600">
+        <span class="text-base">📝</span><span>Request</span>
+      </button>
+      <button onclick="switchTab('track')" class="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600">
+        <span class="text-base">🔄</span><span>Track</span>
+      </button>
+      <button onclick="switchTab('guide')" class="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600">
+        <span class="text-base">♻️</span><span>Guide</span>
+      </button>
+      <button onclick="switchTab('history')" class="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-600">
+        <span class="text-base">📋</span><span>History</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: REQUEST PICKUP (Multi-Step Form Wizard) -->
+    <!-- ========================================================================= -->
+    <section id="view-request" class="tab-content max-w-4xl mx-auto">
+      <!-- Hero Banner -->
+      <div class="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-8 text-white mb-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 mb-3">
+            <span>🌱</span> Zero-Waste Municipal Recycling Initiative
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Schedule Smart Waste Collection</h1>
+          <p class="mt-2 text-emerald-100 text-sm sm:text-base max-w-2xl">
+            Choose your waste category, set a convenient pickup time, and have certified green fleet couriers collect your recyclables directly from your doorstep.
+          </p>
+
+          <!-- Quick Navigation Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-4 border-t border-emerald-700/60 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 flex items-center justify-center font-bold">1</span>
+              <span>Select Category</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 flex items-center justify-center font-bold">2</span>
+              <span>Item & Impact</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 flex items-center justify-center font-bold">3</span>
+              <span>Pickup Location</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 flex items-center justify-center font-bold">4</span>
+              <span>Pick Schedule</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submission Form Container -->
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden" id="requestFormWrapper">
+        <form id="pickupForm" onsubmit="handleSubmitRequest(event)" class="p-6 sm:p-8 space-y-8">
+
+          <!-- SECTION 1: WASTE CATEGORY SELECTION -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">1</span>
+                  Select Waste Category
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Pick the primary type of waste for this pickup request</p>
+              </div>
+              <button type="button" onclick="switchTab('guide')" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1 underline underline-offset-2">
+                Not sure? Check Guide →
+              </button>
+            </div>
+
+            <!-- Categories Grid (Populated dynamically) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5" id="categoryCardsGrid">
+              <!-- Rendered via JS -->
+            </div>
+            <input type="hidden" id="selectedCategoryId" name="category_id" required>
+
+            <!-- Selected Category Info Panel -->
+            <div id="categoryDetailBox" class="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs hidden">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <span class="font-bold text-slate-800" id="catDetailName">Category Guide</span>:
+                  <span class="text-slate-600" id="catDetailGuide"></span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800" id="catCo2Badge">
+                  CO₂ Factor
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-slate-100">
+
+          <!-- SECTION 2: ITEM DESCRIPTION & IMPACT ESTIMATOR -->
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+              <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">2</span>
+              Item Details & Eco-Impact Estimator
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Describe the items and estimate approximate volume</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Left: Description and Photos -->
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">
+                    What items are you disposing? <span class="text-rose-500">*</span>
+                  </label>
+                  <textarea id="item_description" name="item_description" rows="3" required
+                    placeholder="e.g. 3 boxes of old books, 2 laptop chargers, broken printer, flattened amazon boxes"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm placeholder-slate-400"></textarea>
+                </div>
+
+                <!-- Estimated Weight Presets -->
+                <div>
+                  <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-xs font-semibold text-slate-700">Estimated Weight</label>
+                    <span class="text-xs font-mono font-bold text-emerald-600" id="weightDisplay">5.0 kg</span>
+                  </div>
+                  <input type="range" id="weightSlider" min="1" max="100" step="1" value="5" oninput="updateWeightDisplay(this.value)"
+                    class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                  <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
+                    <span>1 kg (Light)</span>
+                    <span>15 kg (Box)</span>
+                    <span>50 kg (Bulky)</span>
+                    <span>100 kg (Max)</span>
+                  </div>
+                </div>
+
+                <!-- Bag / Container Count -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Number of Bags/Boxes</label>
+                    <select id="bag_count" name="bag_count" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500">
+                      <option value="1">1 Bag / Box</option>
+                      <option value="2">2 Bags / Boxes</option>
+                      <option value="3">3 Bags / Boxes</option>
+                      <option value="5">4-5 Bags / Boxes</option>
+                      <option value="10">6-10+ Large Units</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Optional Photo</label>
+                    <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(event)"
+                      class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200">
+                  </div>
+                </div>
+
+                <!-- Photo Preview Box -->
+                <div id="photoPreviewContainer" class="hidden mt-2 relative rounded-xl overflow-hidden border border-slate-200 h-28 bg-slate-50 flex items-center justify-center">
+                  <img id="photoPreviewImg" src="" alt="Photo preview" class="h-full object-cover">
+                  <button type="button" onclick="clearPhotoPreview()" class="absolute top-2 right-2 bg-slate-900/70 text-white rounded-full p-1 hover:bg-rose-600 text-xs">
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: Real-time Eco-Impact Card -->
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs mb-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    PROJECTED RECYCLING IMPACT
+                  </div>
+                  <p class="text-xs text-emerald-700/80 mb-4">By booking this pickup, you keep reusable material out of local landfills:</p>
+
+                  <div class="space-y-3">
+                    <div class="bg-white/80 backdrop-blur rounded-xl p-3 border border-emerald-100 flex items-center justify-between">
+                      <div class="flex items-center gap-2.5">
+                        <span class="text-lg">🌿</span>
+                        <div>
+                          <div class="text-[11px] text-slate-500 font-medium">CO₂ Emissions Avoided</div>
+                          <div class="text-lg font-bold text-slate-900 font-mono" id="calcCo2Saved">7.25 kg</div>
+                        </div>
+                      </div>
+                      <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-100/60 px-2 py-0.5 rounded">Climate Positive</span>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur rounded-xl p-3 border border-emerald-100 flex items-center justify-between">
+                      <div class="flex items-center gap-2.5">
+                        <span class="text-lg">🗑️</span>
+                        <div>
+                          <div class="text-[11px] text-slate-500 font-medium">Landfill Diversion</div>
+                          <div class="text-lg font-bold text-slate-900 font-mono" id="calcLandfillKg">5.00 kg</div>
+                        </div>
+                      </div>
+                      <span class="text-[10px] text-teal-600 font-semibold bg-teal-100/60 px-2 py-0.5 rounded">100% Diverted</span>
+                    </div>
+
+                    <div class="bg-white/80 backdrop-blur rounded-xl p-3 border border-emerald-100 flex items-center justify-between">
+                      <div class="flex items-center gap-2.5">
+                        <span class="text-lg">⭐</span>
+                        <div>
+                          <div class="text-[11px] text-slate-500 font-medium">Eco Reward Points</div>
+                          <div class="text-lg font-bold text-emerald-600 font-mono" id="calcEcoPoints">50 pts</div>
+                        </div>
+                      </div>
+                      <span class="text-[10px] text-amber-700 font-semibold bg-amber-100/80 px-2 py-0.5 rounded">Eco-Badge</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-emerald-200/50 text-[11px] text-emerald-800 flex items-center gap-1.5">
+                  <span>ℹ️</span> 1 metric ton recycled prevents approx. 1,400 kg of greenhouse gases.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="border-slate-100">
+
+          <!-- SECTION 3: PICKUP LOCATION & CONTACT -->
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+              <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">3</span>
+              Pickup Location & Contact Information
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Where should our collection team arrive?</p>
+
+            <!-- Preset Zone Shortcuts -->
+            <div class="mb-4">
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Quick Location Presets (Click to autofill):</label>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button type="button" onclick="applyPresetAddress('downtown')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 transition">
+                  📍 Metro Downtown (Apt 4B)
+                </button>
+                <button type="button" onclick="applyPresetAddress('techpark')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 transition">
+                  📍 Tech Valley Campus (Dock 3)
+                </button>
+                <button type="button" onclick="applyPresetAddress('suburbs')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 text-slate-700 transition">
+                  📍 Green Hills Residential
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Street Address <span class="text-rose-500">*</span></label>
+                <input type="text" id="address" name="address" required placeholder="e.g. 742 Evergreen Terrace"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Apartment, Unit, or Suite</label>
+                <input type="text" id="apartment" name="apartment" placeholder="e.g. Apt 4B / Loading Dock"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">City & Postal Code <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="text" id="city" name="city" value="Springfield" required
+                    class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500">
+                  <input type="text" id="zip_code" name="zip_code" value="97477" required
+                    class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name <span class="text-rose-500">*</span></label>
+                <input type="text" id="user_name" name="user_name" required placeholder="e.g. Alex Morgan"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number <span class="text-rose-500">*</span></label>
+                <input type="tel" id="user_phone" name="user_phone" required placeholder="e.g. +1 (555) 345-6789"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address (For receipt & status notifications)</label>
+                <input type="email" id="user_email" name="user_email" placeholder="e.g. alex.morgan@example.com"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <!-- Map Simulation Coordinates -->
+              <input type="hidden" id="latitude" name="latitude" value="44.0521">
+              <input type="hidden" id="longitude" name="longitude" value="-123.0165">
+            </div>
+          </div>
+
+          <hr class="border-slate-100">
+
+          <!-- SECTION 4: PICKUP SCHEDULING & INSTRUCTIONS -->
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+              <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">4</span>
+              Pickup Scheduling & Access Notes
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Choose a collection date and time window</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Collection Date <span class="text-rose-500">*</span></label>
+                <input type="date" id="pickup_date" name="pickup_date" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Preferred Time Window <span class="text-rose-500">*</span></label>
+                <select id="pickup_time_slot" name="pickup_time_slot" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                  <option value="Morning (08:00 AM - 12:00 PM)">🌅 Morning (08:00 AM - 12:00 PM)</option>
+                  <option value="Afternoon (12:00 PM - 04:00 PM)" selected>☀️ Afternoon (12:00 PM - 04:00 PM)</option>
+                  <option value="Evening (04:00 PM - 08:00 PM)">🌇 Evening (04:00 PM - 08:00 PM)</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Access Notes / Curbside Instructions</label>
+                <input type="text" id="special_instructions" name="special_instructions"
+                  placeholder="e.g. Leave by front porch stairs, ring doorbell twice, gate code #1234"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBMISSION BUTTON -->
+          <div class="pt-4 flex items-center justify-between gap-4">
+            <div class="text-xs text-slate-500">
+              🔒 Certified municipal waste collection service.
+            </div>
+            <button type="submit" id="submitBtn"
+              class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
+              <span>🚀 Submit Pickup Request</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SUCCESS CONFIRMATION MODAL / CARD -->
+      <div id="requestSuccessCard" class="hidden bg-white rounded-3xl p-8 border border-emerald-200 shadow-xl text-center">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto mb-4">
+          ✓
+        </div>
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+          Request Confirmed & Dispatched
+        </span>
+        <h2 class="text-2xl font-extrabold text-slate-900">Pickup Request Successfully Submitted!</h2>
+        <p class="text-sm text-slate-600 mt-2 max-w-lg mx-auto">
+          Our dispatch team has queued your request. You can track courier assignment, route progress, and collection status in real time.
+        </p>
+
+        <!-- Tracking ID Highlight Box -->
+        <div class="my-6 max-w-sm mx-auto p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-emerald-300">
+          <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Your Tracking ID</div>
+          <div class="text-2xl font-mono font-extrabold text-emerald-700 mt-1 flex items-center justify-center gap-2">
+            <span id="createdTrackingId">ECO-0000</span>
+            <button type="button" onclick="copyTrackingId()" class="text-xs font-sans text-slate-600 hover:text-emerald-700 px-2 py-1 rounded bg-white border border-slate-200">
+              📋 Copy
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button onclick="trackSpecificRequest(currentCreatedTrackingId)" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow transition">
+            🔄 Track Status Live
+          </button>
+          <button onclick="resetRequestForm()" class="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition">
+            Submit Another Request
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: TRACK STATUS (Live Tracking & Visual Timeline) -->
+    <!-- ========================================================================= -->
+    <section id="view-track" class="tab-content max-w-4xl mx-auto hidden">
+      <!-- Search Bar -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 mb-6">
+        <h2 class="text-xl font-bold text-slate-900 mb-2">Track Collection Request</h2>
+        <p class="text-xs text-slate-500 mb-4">Enter your tracking code (e.g. ECO-8941) to monitor live status, driver dispatch, and route updates.</p>
+
+        <form onsubmit="handleSearchTracking(event)" class="flex gap-2">
+          <input type="text" id="trackInput" placeholder="Enter tracking code (e.g. ECO-8942)"
+            class="flex-1 px-4 py-3 rounded-xl border border-slate-200 font-mono text-sm uppercase focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+          <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow transition">
+            Lookup
+          </button>
+        </form>
+
+        <!-- Quick tracking pill suggestions -->
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400">Quick Demo Pickups:</span>
+          <button onclick="trackSpecificRequest('ECO-8941')" class="font-mono text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">ECO-8941 (Scheduled)</button>
+          <button onclick="trackSpecificRequest('ECO-8942')" class="font-mono text-teal-700 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200">ECO-8942 (In Transit)</button>
+          <button onclick="trackSpecificRequest('ECO-8943')" class="font-mono text-emerald-800 bg-emerald-100/60 hover:bg-emerald-200 px-2 py-0.5 rounded border border-emerald-300">ECO-8943 (Completed)</button>
+        </div>
+      </div>
+
+      <!-- Live Tracking Detail Display Container -->
+      <div id="trackingResultContainer" class="hidden space-y-6">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: DISPOSAL GUIDE ("Can I Recycle This?" Encyclopedia) -->
+    <!-- ========================================================================= -->
+    <section id="view-guide" class="tab-content max-w-5xl mx-auto hidden">
+      <!-- Search Header -->
+      <div class="bg-gradient-to-r from-teal-900 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white mb-8 shadow-lg">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 mb-3">
+          <span>🔍</span> Municipal Smart Waste Classifier
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold">Can I Recycle This?</h2>
+        <p class="mt-1 text-emerald-100 text-sm max-w-2xl">
+          Instantly find out which bin or collection service is required for any item, along with rinsing, separating, and safety instructions.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="mt-5 relative">
+          <input type="text" id="guideSearchInput" oninput="handleGuideSearch(this.value)"
+            placeholder="Search any item (e.g. pizza box, batteries, paint, old laptop, glass jar)..."
+            class="w-full px-5 py-3.5 pl-12 rounded-2xl bg-white text-slate-900 placeholder-slate-400 text-sm shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-400/30">
+          <svg class="w-5 h-5 text-slate-400 absolute left-4 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+
+        <!-- Quick Tags -->
+        <div class="mt-3 flex flex-wrap gap-2 text-xs">
+          <span class="text-emerald-300">Popular queries:</span>
+          <button onclick="setGuideQuery('Pizza Box')" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-0.5 rounded-full">🍕 Pizza Box</button>
+          <button onclick="setGuideQuery('Lithium Phone Battery')" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-0.5 rounded-full">🔋 Battery</button>
+          <button onclick="setGuideQuery('Paint')" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-0.5 rounded-full">🎨 Paint</button>
+          <button onclick="setGuideQuery('Styrofoam')" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-0.5 rounded-full">📦 Styrofoam</button>
+          <button onclick="setGuideQuery('Laptop')" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-0.5 rounded-full">💻 Laptop</button>
+        </div>
+      </div>
+
+      <!-- Quick Item Search Results -->
+      <div id="guideSearchResults" class="mb-10">
+        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Item Classification Results</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="guideItemsGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Full Category Encyclopedia -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4">Complete Waste Stream Categories</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="encyclopediaGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: MY HISTORY (Citizen Pickups & Eco-Receipts) -->
+    <!-- ========================================================================= -->
+    <section id="view-history" class="tab-content max-w-4xl mx-auto hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-900">My Pickup Requests</h2>
+          <p class="text-xs text-slate-500 mt-1">Review your recent collection requests, receipts, and environmental impact.</p>
+        </div>
+        <button onclick="switchTab('request')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+          + Book New Pickup
+        </button>
+      </div>
+
+      <!-- Impact Summary for Citizen -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">🌱</div>
+          <div>
+            <div class="text-[11px] text-slate-500">Your Diverted Waste</div>
+            <div class="text-lg font-bold text-slate-900 font-mono" id="userHistoryKg">0 kg</div>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg">🌍</div>
+          <div>
+            <div class="text-[11px] text-slate-500">Your CO₂ Offset</div>
+            <div class="text-lg font-bold text-slate-900 font-mono" id="userHistoryCo2">0 kg</div>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">⭐</div>
+          <div>
+            <div class="text-[11px] text-slate-500">Green Citizen Points</div>
+            <div class="text-lg font-bold text-emerald-600 font-mono" id="userHistoryPoints">0 pts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History List -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden" id="historyListContainer">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 5: ADMIN / DISPATCHER DASHBOARD -->
+    <!-- ========================================================================= -->
+    <section id="view-admin" class="tab-content max-w-7xl mx-auto hidden">
+      <!-- Admin Top Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6 bg-slate-900 text-white p-6 rounded-3xl shadow-lg">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold">Admin Dispatch Console</span>
+          </div>
+          <h1 class="text-2xl font-extrabold tracking-tight mt-1">Municipal Waste Operations & Fleet Hub</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Manage waste requests, driver dispatch, route updates, and recycling analytics.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="exportToCsv()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition">
+            📥 Export CSV
+          </button>
+          <button onclick="handleSeedReset()" class="px-3.5 py-2 rounded-xl bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 text-xs font-semibold border border-rose-800/60 transition">
+            🔄 Reset Demo Data
+          </button>
+          <button onclick="fetchAdminData()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5">
+            ⚡ Refresh Data
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI METRICS ROW -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6" id="adminKpis">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Total Requests</div>
+          <div class="text-2xl font-extrabold text-slate-900 mt-1 font-mono" id="kpiTotal">0</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-amber-200/80 bg-amber-50/20 shadow-sm">
+          <div class="text-[11px] font-semibold text-amber-700 uppercase">Pending Review</div>
+          <div class="text-2xl font-extrabold text-amber-600 mt-1 font-mono" id="kpiPending">0</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-blue-200/80 bg-blue-50/20 shadow-sm">
+          <div class="text-[11px] font-semibold text-blue-700 uppercase">Scheduled</div>
+          <div class="text-2xl font-extrabold text-blue-600 mt-1 font-mono" id="kpiScheduled">0</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-purple-200/80 bg-purple-50/20 shadow-sm">
+          <div class="text-[11px] font-semibold text-purple-700 uppercase">In Transit</div>
+          <div class="text-2xl font-extrabold text-purple-600 mt-1 font-mono" id="kpiTransit">0</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/20 shadow-sm">
+          <div class="text-[11px] font-semibold text-emerald-700 uppercase">Completed</div>
+          <div class="text-2xl font-extrabold text-emerald-600 mt-1 font-mono" id="kpiCompleted">0</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Diverted (kg)</div>
+          <div class="text-2xl font-extrabold text-teal-600 mt-1 font-mono" id="kpiWeight">0</div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS BREAKDOWN -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Category Distribution Bars -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Waste Stream Recovery by Category</h3>
+            <span class="text-xs text-slate-400">Total Mass Diverted (kg)</span>
+          </div>
+          <div class="space-y-3" id="adminCategoryBars">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Fleet Status Card -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Collection Fleet</h3>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">4 Active</span>
+            </div>
+            <div class="space-y-2.5" id="adminFleetList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+            Dispatchers can assign drivers directly in the requests table.
+          </div>
+        </div>
+      </div>
+
+      <!-- REQUESTS TABLE & FILTER TOOLBAR -->
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Filter Controls -->
+        <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Status Filter Pills -->
+            <button onclick="setAdminStatusFilter('all')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white" data-status="all">All</button>
+            <button onclick="setAdminStatusFilter('pending')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-status="pending">Pending</button>
+            <button onclick="setAdminStatusFilter('scheduled')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-status="scheduled">Scheduled</button>
+            <button onclick="setAdminStatusFilter('in_progress')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-status="in_progress">In Transit</button>
+            <button onclick="setAdminStatusFilter('completed')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-status="completed">Completed</button>
+            <button onclick="setAdminStatusFilter('cancelled')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-100" data-status="cancelled">Cancelled</button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <!-- Category Dropdown -->
+            <select id="adminCategorySelect" onchange="applyAdminFilters()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white">
+              <option value="all">All Categories</option>
+              <!-- Filled via JS -->
+            </select>
+
+            <!-- Search Input -->
+            <div class="relative flex-1 sm:w-64">
+              <input type="text" id="adminSearchInput" oninput="applyAdminFilters()" placeholder="Search ID, citizen, address..."
+                class="w-full px-3 py-2 pl-8 rounded-xl border border-slate-200 text-xs focus:ring-emerald-500 focus:border-emerald-500">
+              <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Tracking Code</th>
+                <th class="py-3 px-4">Citizen / Contact</th>
+                <th class="py-3 px-4">Category & Items</th>
+                <th class="py-3 px-4">Weight</th>
+                <th class="py-3 px-4">Scheduled Slot</th>
+                <th class="py-3 px-4">Assigned Driver</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="adminTableEmpty" class="hidden p-12 text-center text-slate-400 text-xs">
+          No collection requests found matching your filter criteria.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADMIN DETAIL & DISPATCH EDITOR -->
+  <!-- ========================================================================= -->
+  <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Dispatch Dossier</span>
+          <h2 class="text-xl font-extrabold text-slate-900 font-mono" id="modalTrackingId">ECO-0000</h2>
+        </div>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold p-1">✕</button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs" id="modalDetailsBody">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button onclick="closeAdminModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">
+          Close
+        </button>
+        <button onclick="saveAdminModalChanges()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CITIZEN ECO-RECEIPT & GREEN CERTIFICATE -->
+  <!-- ========================================================================= -->
+  <div id="certificateModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border-4 border-emerald-500 relative">
+      <!-- Certificate Header -->
+      <div class="text-center pb-4 border-b border-emerald-100">
+        <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-2xl font-bold mb-2">
+          🌱
+        </div>
+        <div class="text-xs uppercase tracking-widest text-emerald-800 font-extrabold">Official Green Certificate</div>
+        <h3 class="text-xl font-black text-slate-900 mt-1">Resource Diversion Verification</h3>
+        <p class="text-[11px] text-slate-500">Smart Waste Collection & Circular Economy Program</p>
+      </div>
+
+      <!-- Certificate Content -->
+      <div class="my-6 space-y-3 text-xs" id="certificateBody">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Certificate Footer & Actions -->
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between no-print">
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center gap-1.5">
+          🖨️ Print / Save PDF
+        </button>
+        <button onclick="closeCertificateModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">E</span>
+        <span class="font-bold text-slate-700">EcoCollect Platform</span>
+        <span>• Municipal Smart Waste Management & Circular Recycling</span>
+      </div>
+      <div>
+        Achievable 4-Hour Hackathon MVP • Built with Node.js & SQLite
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
